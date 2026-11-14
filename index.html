@@ -6,7 +6,7 @@
   try{ok=+localStorage.getItem("rekap_ok")||0}catch(e){}
   if(Date.now()-ok>8*3600*1000){
     document.documentElement.style.display="none";
-    location.replace("index.html");
+    location.replace("https://guruhwijaya.github.io/Tirto-04/");
   }
 })();
 </script>
@@ -103,11 +103,11 @@ function sm(){const nr=Object.keys(S.f[P]||{}).length+Object.keys(S.f[pv(P)]||{}
 const lk=m=>(S.lk||[]).includes(m);
 const cls=r=>r.pk<0?'bad':r.pk>=500?'hi':S.f[P]?.[r.i]?'ragu':'';
 function body(){const q=Q.toLowerCase();$('#tb').innerHTML=rows().filter(r=>r.n.toLowerCase().includes(q)).map(r=>`<tr><td>${r.i+1}<td class=l>${esc(r.n)}<td><input type=number inputmode=numeric data-l=${r.i} ${(lk(pv(P))||lk(P))?'disabled':''} value=\"${r.lalu??''}\" class=\"${S.f[pv(P)]?.[r.i]?'ragu':''}\"><td><input type=number inputmode=numeric data-i=${r.i} ${lk(P)?'disabled':''} value="${r.ini??''}" class="${cls(r)}"><td><button class=ic data-e=${r.i} aria-label="Ubah">⚙</button></tr>`).join('');sm()}
-function v2(){const R=rows(),h=R.filter(r=>r.fin==null).length;return`<div class=bar><label>Bulan<input type=month id=pm value="${P}"></label><label>Beban Rp<input id=bb type=number inputmode=numeric value=${S.b} style="width:90px"></label></div>
+function v2(){const R=rows(),h=R.filter(r=>r.fin==null).length;return`<div class=pg1><div class=bar><label>Bulan<input type=month id=pm value="${P}"></label><label>Beban Rp<input id=bb type=number inputmode=numeric value=${S.b} style="width:90px"></label></div>
 <p class=sm>${h?h+' konsumen belum terisi (dilewati dari total). ':''}Tarif per konsumen: ubah lewat menu 1 (⚙).</p>
 <div class=sc><table><thead><tr><th>NO<th class=l>NAMA KONSUMEN<th>Meter bulan lalu<th>Meter bulan ini<th>Jumlah pemakaian<th>Beban<th>Total tagihan<th>Total min.</thead><tbody>${R.map(r=>`<tr><td>${r.i+1}<td class=l>${esc(r.n)}<td>${r.lalu??''}${S.f[pv(P)]?.[r.i]?' ⚠':''}<td>${r.ini??''}${S.f[P]?.[r.i]?' ⚠':''}<td class="${r.pk<0?'neg bgr':r.pk>=500?'bgo':''}">${r.pk??''}<td>${rp(S.b)}<td>${rp(r.tot)}<td>${rp(r.fin)}</tr>`).join('')}</tbody>
 <tfoot><tr><td colspan=6>TOTAL TAGIHAN ${lab(P)}<td>${rp(sum(R,'tot'))}<td>${rp(sum(R,'fin'))}</tfoot></table></div>
-<div class=bar>${papSel()}<button id=v2 class=pri>Lihat PDF</button><button id=p2>Unduh PDF</button><button id=x2>Unduh Excel</button></div>`}
+<div class=bar>${papSel()}<button id=v2 class=pri>Lihat PDF</button><button id=p2>Unduh PDF</button><button id=x2>Unduh Excel</button></div></div>`}
 const cl=()=>{const R=rows();return SK?R.filter(r=>r.fin!=null):R};
 const PS={a4:[210,297,'A4'],legal:[215.9,355.6,'Legal'],f4:[215,330,'F4']};
 let PAPER=(()=>{try{const v=localStorage.getItem('tu_paper');return PS[v]?v:'a4'}catch(e){return 'a4'}})();
@@ -119,9 +119,9 @@ const cd=r=>r?`<div class=card><h4>AIR BERSIH “TIRTO UTOMO” RW 04 - JUNREJO<
 <div class=r></div><div class=r><span>Total Tagihan</span><span>:</span><b class=n>${rp(r.fin)}</b></div><div class=r></div>
 <p><span>UNTUK KOMPLAIN, LANGSUNG KE PAK TARI</span><b>${r.i+1}</b></p></div>`:'<div></div>';
 function v3(){const L=cl(),rw=cRows(),n=rw*2,np=Math.max(1,Math.ceil(L.length/n));C=Math.min(C,np-1);const g=L.slice(C*n,C*n+n),o=[];for(let r=0;r<rw;r++)o.push(g[r],g[r+rw]);
-return`<div class=bar><label>Bulan<input type=month id=pm value="${P}"></label><label><input type=checkbox id=sk ${SK?'checked':''}>Lewati yang belum terisi</label></div><p class=sm>Semua kartu tampil sejak awal. Angka terisi otomatis begitu meter diinput di menu 1.</p>
+return`<div class=pg1><div class=bar><label>Bulan<input type=month id=pm value="${P}"></label><label><input type=checkbox id=sk ${SK?'checked':''}>Lewati yang belum terisi</label></div><p class=sm>Semua kartu tampil sejak awal. Angka terisi otomatis begitu meter diinput di menu 1.</p>
 <div class=bar>${papSel()}<button id=pp ${C?'':'disabled'}>‹</button><span>Halaman ${C+1} / ${np} · ${L.length} kartu (${n} per lembar ${pap()[2]})</span><button id=pn ${C<np-1?'':'disabled'}>›</button></div>
-<div class=grid>${o.map(cd).join('')}</div><div class=bar><button id=v3 class=pri>Lihat PDF</button><button id=p3>Unduh PDF</button><button id=x3>Unduh Excel</button></div>`}
+<div class=sc style="padding:6px"><div class=grid>${o.map(cd).join('')}</div></div><div class=bar><button id=v3 class=pri>Lihat PDF</button><button id=p3>Unduh PDF</button><button id=x3>Unduh Excel</button></div></div>`}
 function render(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',+b.dataset.t===T));$('#app').innerHTML=[v1,v2,v3][T-1]();if(T===1)body()}
 /* ===== unduh ===== */
 async function dl(name,data){const d=window.claude&&await claude.use('downloads');if(d){try{await d.save({filename:name,data});toast('Tersimpan: '+name)}catch(e){if(e.code!=='declined')toast('Gagal menyimpan ('+(e.code||'error')+')')}return}
