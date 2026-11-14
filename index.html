@@ -107,17 +107,21 @@ function v2(){const R=rows(),h=R.filter(r=>r.fin==null).length;return`<div class
 <p class=sm>${h?h+' konsumen belum terisi (dilewati dari total). ':''}Tarif per konsumen: ubah lewat menu 1 (⚙).</p>
 <div class=sc><table><thead><tr><th>NO<th class=l>NAMA KONSUMEN<th>Meter bulan lalu<th>Meter bulan ini<th>Jumlah pemakaian<th>Beban<th>Total tagihan<th>Total min.</thead><tbody>${R.map(r=>`<tr><td>${r.i+1}<td class=l>${esc(r.n)}<td>${r.lalu??''}${S.f[pv(P)]?.[r.i]?' ⚠':''}<td>${r.ini??''}${S.f[P]?.[r.i]?' ⚠':''}<td class="${r.pk<0?'neg bgr':r.pk>=500?'bgo':''}">${r.pk??''}<td>${rp(S.b)}<td>${rp(r.tot)}<td>${rp(r.fin)}</tr>`).join('')}</tbody>
 <tfoot><tr><td colspan=6>TOTAL TAGIHAN ${lab(P)}<td>${rp(sum(R,'tot'))}<td>${rp(sum(R,'fin'))}</tfoot></table></div>
-<div class=bar><button id=v2 class=pri>Lihat PDF</button><button id=p2>Unduh PDF</button><button id=x2>Unduh Excel</button></div>`}
+<div class=bar>${papSel()}<button id=v2 class=pri>Lihat PDF</button><button id=p2>Unduh PDF</button><button id=x2>Unduh Excel</button></div>`}
 const cl=()=>{const R=rows();return SK?R.filter(r=>r.fin!=null):R};
+const PS={a4:[210,297,'A4'],legal:[215.9,355.6,'Legal'],f4:[215,330,'F4']};
+let PAPER=(()=>{try{const v=localStorage.getItem('tu_paper');return PS[v]?v:'a4'}catch(e){return 'a4'}})();
+const pap=()=>PS[PAPER]||PS.a4,cRows=()=>Math.max(1,Math.floor((pap()[1]-11)/CH));
+const papSel=()=>`<label>Kertas<select id=pap>${Object.keys(PS).map(k=>`<option value=${k} ${k===PAPER?'selected':''}>${PS[k][2]}</option>`).join('')}</select></label>`;
 const cd=r=>r?`<div class=card><h4>AIR BERSIH “TIRTO UTOMO” RW 04 - JUNREJO</h4>
 <div class=r><span>Bulan Tagihan</span><b class=v>${lab(P)}</b></div><div class=r><span>Nama Konsumen</span><b class=v>${esc(r.n)}</b></div>
 <div class=r><span>Jml Meter Bulan Lalu</span><span>:</span><span class=n>${r.lalu??''}</span></div><div class=r><span>Jml Meter Bulan Ini</span><span>:</span><span class=n>${r.ini??''}</span></div><div class=r><span>Jml Meter</span><span>:</span><span class=n>${r.pk??''}</span></div>
 <div class=r></div><div class=r><span>Total Tagihan</span><span>:</span><b class=n>${rp(r.fin)}</b></div><div class=r></div>
 <p><span>UNTUK KOMPLAIN, LANGSUNG KE PAK TARI</span><b>${r.i+1}</b></p></div>`:'<div></div>';
-function v3(){const L=cl(),np=Math.max(1,Math.ceil(L.length/10));C=Math.min(C,np-1);const g=L.slice(C*10,C*10+10),o=[];for(let r=0;r<5;r++)o.push(g[r],g[r+5]);
+function v3(){const L=cl(),rw=cRows(),n=rw*2,np=Math.max(1,Math.ceil(L.length/n));C=Math.min(C,np-1);const g=L.slice(C*n,C*n+n),o=[];for(let r=0;r<rw;r++)o.push(g[r],g[r+rw]);
 return`<div class=bar><label>Bulan<input type=month id=pm value="${P}"></label><label><input type=checkbox id=sk ${SK?'checked':''}>Lewati yang belum terisi</label></div><p class=sm>Semua kartu tampil sejak awal. Angka terisi otomatis begitu meter diinput di menu 1.</p>
-<div class=bar><button id=pp ${C?'':'disabled'}>‹</button><span>Halaman ${C+1} / ${np} · ${L.length} kartu (10 per lembar A4)</span><button id=pn ${C<np-1?'':'disabled'}>›</button></div>
-<div class=grid>${o.map(cd).join('')}</div><div class=bar><button id=v3 class=pri>Lihat PDF</button><button id=p3>Unduh PDF (A4)</button><button id=x3>Unduh Excel</button></div>`}
+<div class=bar>${papSel()}<button id=pp ${C?'':'disabled'}>‹</button><span>Halaman ${C+1} / ${np} · ${L.length} kartu (${n} per lembar ${pap()[2]})</span><button id=pn ${C<np-1?'':'disabled'}>›</button></div>
+<div class=grid>${o.map(cd).join('')}</div><div class=bar><button id=v3 class=pri>Lihat PDF</button><button id=p3>Unduh PDF</button><button id=x3>Unduh Excel</button></div>`}
 function render(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',+b.dataset.t===T));$('#app').innerHTML=[v1,v2,v3][T-1]();if(T===1)body()}
 /* ===== unduh ===== */
 async function dl(name,data){const d=window.claude&&await claude.use('downloads');if(d){try{await d.save({filename:name,data});toast('Tersimpan: '+name)}catch(e){if(e.code!=='declined')toast('Gagal menyimpan ('+(e.code||'error')+')')}return}
@@ -144,12 +148,12 @@ const f=cell(10,0);f.value='UNTUK KOMPLAIN, LANGSUNG KE PAK TARI';f.font=F(10);f
 for(let r=0;r<11;r++)for(let q=0;q<4;q++){const b={};if(q===0)b.left=M;if(q===3)b.right=M;if(r===0)b.top=M;if(r===1||r===10)b.bottom=M;cell(r,q).border=b}});
 for(let k=1;k<nP;k++)ws.getRow(k*55).addPageBreak();
 dl('Kartu_'+tag()+'.xlsx',await wb.xlsx.writeBuffer())}
-function pIuran(){const R=rows(),d=new jspdf.jsPDF('p','mm','a4');d.setFont('helvetica','bold');d.setFontSize(10);
-['LEMBAR BACA METER','AIR BERSIH "TIRTO UTOMO" - JUNREJO - RW.04','TAGIHAN BULAN : '+lab(P)].forEach((t,i)=>d.text(t,105,12+i*5,{align:'center'}));
+function pIuran(){const R=rows(),[W,H]=pap(),d=new jspdf.jsPDF('p','mm',[W,H]),mg=(W-190)/2;d.setFont('helvetica','bold');d.setFontSize(10);
+['LEMBAR BACA METER','AIR BERSIH "TIRTO UTOMO" - JUNREJO - RW.04','TAGIHAN BULAN : '+lab(P)].forEach((t,i)=>d.text(t,W/2,12+i*5,{align:'center'}));
 const cs={0:{halign:'center',cellWidth:10},1:{cellWidth:42}};for(let i=2;i<8;i++)cs[i]={halign:'right',cellWidth:[22,22,22,20,26,26][i-2]};
 d.autoTable({startY:28,head:[['NO','NAMA KONSUMEN','Meter\nBulan lalu','Meter\nBulan Ini','Jumlah\nPemakaian','Beban','Total\nTagihan','Total\n<10K = 10K']],
 body:R.map(r=>[r.i+1,r.n,r.lalu??'',r.ini??'',r.pk??'',rp(S.b),rp(r.tot),rp(r.fin)]),foot:[[{content:'TOTAL TAGIHAN',colSpan:6,styles:{halign:'center'}},rp(sum(R,'tot')),rp(sum(R,'fin'))]],
-showFoot:'lastPage',theme:'grid',styles:{fontSize:8,cellPadding:1,textColor:0,lineColor:0,lineWidth:.1},headStyles:{fillColor:[221,221,221],textColor:0,halign:'center',valign:'middle'},footStyles:{fillColor:[221,221,221],textColor:0,halign:'right'},columnStyles:cs,didParseCell:h=>{if(h.section==='body'&&h.column.index===4&&typeof h.cell.raw==='number'){if(h.cell.raw<0)h.cell.styles.fillColor=[240,150,150];else if(h.cell.raw>=500)h.cell.styles.fillColor=[255,190,110]}if(h.section==='body'&&h.column.index===1&&/INDOMARET|ENDANG|ALFAMART|HISANA/i.test(String(h.cell.raw)))h.cell.styles.textColor=[220,0,0];if(h.section==='body'&&h.column.index===7&&R[h.row.index]&&R[h.row.index].fin!==null&&R[h.row.index].fin<=10000)h.cell.styles.fillColor=[217,217,217]},margin:{left:10,right:10,top:10,bottom:10}});
+showFoot:'lastPage',theme:'grid',styles:{fontSize:8,cellPadding:1,textColor:0,lineColor:0,lineWidth:.1},headStyles:{fillColor:[221,221,221],textColor:0,halign:'center',valign:'middle'},footStyles:{fillColor:[221,221,221],textColor:0,halign:'right'},columnStyles:cs,didParseCell:h=>{if(h.section==='body'&&h.column.index===4&&typeof h.cell.raw==='number'){if(h.cell.raw<0)h.cell.styles.fillColor=[240,150,150];else if(h.cell.raw>=500)h.cell.styles.fillColor=[255,190,110]}if(h.section==='body'&&h.column.index===1&&/INDOMARET|ENDANG|ALFAMART|HISANA/i.test(String(h.cell.raw)))h.cell.styles.textColor=[220,0,0];if(h.section==='body'&&h.column.index===7&&R[h.row.index]&&R[h.row.index].fin!==null&&R[h.row.index].fin<=10000)h.cell.styles.fillColor=[217,217,217]},margin:{left:mg,right:mg,top:10,bottom:10}});
 return['Real_Total_Iuran_'+tag()+'.pdf',d]}
 const K=25.4/96*.97,PT=25.4/72*.97,CWL=[128,69,69,71].map(v=>v*K),CWR=[128,69,69,74].map(v=>v*K),GAP=69*K,RH=[15,15.75,15,15,15,15,15,15,15,15,15.75].map(v=>v*PT),CH=RH.reduce((a,b)=>a+b),SM=a=>a.reduce((x,y)=>x+y);
 function card(d,x,y,w,r){const W=SM(w),ry=i=>y+SM(RH.slice(0,i)),mid=i=>ry(i)+RH[i]/2+1.2,R=x+W-1.2;d.setDrawColor(0);d.setLineWidth(.5);d.rect(x,y,W,CH);d.line(x,ry(2),x+W,ry(2));
@@ -159,7 +163,7 @@ lb(2,'Bulan Tagihan');lb(3,'Nama Konsumen');lb(4,'Jml Meter Bulan Lalu');lb(5,'J
 d.setFont('helvetica','bold');d.setFontSize(10);d.text(lab(P),cx,mid(2));d.text(r.n,cx,mid(3));
 [[4,r.lalu],[5,r.ini],[6,r.pk],[8,r.fin==null?'':rp(r.fin)]].forEach(([i,v])=>{d.setFont('helvetica','normal');d.setFontSize(10);d.text(':',cx,mid(i));d.setFont('helvetica',i===8?'bold':'normal');d.text(String(v??''),R,mid(i),{align:'right'})});
 d.setFont('helvetica','normal');d.setFontSize(8.5);d.text('UNTUK KOMPLAIN, LANGSUNG KE PAK TARI',x+(w[0]+w[1]+w[2])/2,mid(10),{align:'center'});d.setFont('helvetica','bold');d.setFontSize(10);d.text(String(r.i+1),R,mid(10),{align:'right'})}
-function pKartu(){const L=cl(),d=new jspdf.jsPDF('p','mm','a4');L.forEach((r,j)=>{const k=j%10;if(!k&&j)d.addPage();card(d,5+(k>=5?SM(CWL)+GAP:0),6+(k%5)*CH,k>=5?CWR:CWL,r)});if(!L.length)d.text('Belum ada data',20,20);return['Kartu_'+tag()+'.pdf',d]}
+function pKartu(){const L=cl(),[W,H]=pap(),rw=cRows(),n=rw*2,xo=(W-210)/2,d=new jspdf.jsPDF('p','mm',[W,H]);L.forEach((r,j)=>{const k=j%n,rc=k>=rw;if(!k&&j)d.addPage();card(d,5+xo+(rc?SM(CWL)+GAP:0),6+(k%rw)*CH,rc?CWR:CWL,r)});if(!L.length)d.text('Belum ada data',20,20);return['Kartu_'+tag()+'.pdf',d]}
 const ld=u=>new Promise((y,n)=>{const s=document.createElement('script');s.src=u;s.onload=y;s.onerror=n;document.head.appendChild(s)});let PV=null;
 async function view(f){PV=f();$('#pv').hidden=false;$('#pv').innerHTML=`<div class=pvh><b>${PV[0]}</b><span><button id=pvd class=pri>Unduh</button> <button id=pvc>Tutup</button></span></div><div class=pvb id=pvb><p class=sm>Menyiapkan PDF…</p></div>`;
 try{const B='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';if(!window.pdfjsLib){await ld(B+'pdf.min.js');await ld(B+'pdf.worker.min.js')}pdfjsLib.GlobalWorkerOptions.workerSrc=B+'pdf.worker.min.js';
@@ -209,7 +213,7 @@ else if(id==='phk'){const v=prompt('API key Anthropic baru (kosongkan untuk meng
 else if(id==='rs'){if(b.dataset.s){S=seed();save();render();toast('Data dikembalikan ke awal (Mei 2026)')}else{b.dataset.s=1;b.textContent='Tekan lagi: semua input hilang'}}
 else if(id==='pp'){C--;render()}else if(id==='pn'){C++;render()}
 else if(id==='x1')xDaftar();else if(id==='x2')xIuran();else if(id==='x3')xKartu();else if(id==='p2'||id==='p3'){const[n,d]=(id==='p2'?pIuran:pKartu)();dl(n,d.output('arraybuffer'))}else if(id==='phb')phOpen();else if(id==='phr')phRead();else if(id==='pha')phApply();else if(id==='v2')view(pIuran);else if(id==='v3')view(pKartu);else if(id==='pvc')$('#pv').hidden=true;else if(id==='pvd'&&PV)dl(PV[0],PV[1].output('arraybuffer'))});
-document.addEventListener('change',e=>{const t=e.target;if(t.id==='pci'||t.id==='pcl'){phFill();phTable();return}if(t.dataset.ru!=null){PH.rows[+t.dataset.ru].use=t.checked;return}if(t.dataset.rv){const r=PH.rows[+t.dataset.rv.slice(1)];r[t.dataset.rv[0]==='l'?'lalu':'ini']=t.value===''?null:+t.value;r.fl=r.fl0=0;phTable();return}if(t.id==='pm'&&t.value){P=t.value;C=0;render()}
+document.addEventListener('change',e=>{const t=e.target;if(t.id==='pci'||t.id==='pcl'){phFill();phTable();return}if(t.dataset.ru!=null){PH.rows[+t.dataset.ru].use=t.checked;return}if(t.dataset.rv){const r=PH.rows[+t.dataset.rv.slice(1)];r[t.dataset.rv[0]==='l'?'lalu':'ini']=t.value===''?null:+t.value;r.fl=r.fl0=0;phTable();return}if(t.id==='pap'){PAPER=PS[t.value]?t.value:'a4';try{localStorage.setItem('tu_paper',PAPER)}catch(e){}C=0;render();return}if(t.id==='pm'&&t.value){P=t.value;C=0;render()}
 else if(t.id==='bb'){S.b=+t.value||0;save();render()}else if(t.id==='sk'){SK=t.checked;C=0;render()}
 else if(t.dataset.l!=null){const i=+t.dataset.l,p=pv(P);if(lk(p)||lk(P))return;(S.r[p]??=[])[i]=t.value===''?null:+t.value;(S.f[p]??={})[i]=1;save();t.className='ragu';const n=t.closest('tr').querySelector('[data-i]');n.className=cls(rows()[i]);sm()}
 else if(t.dataset.i!=null){const i=+t.dataset.i;(S.r[P]??=[])[i]=t.value===''?null:+t.value;if(S.f[P])delete S.f[P][i];save();t.className=cls(rows()[i]);sm()}});
