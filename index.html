@@ -1,5 +1,15 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta charset="utf-8">
+<html lang="id" data-theme="light"><head><meta charset="utf-8">
+<script>
+(function(){
+  var ok=0;
+  try{ok=+localStorage.getItem("rekap_ok")||0}catch(e){}
+  if(Date.now()-ok>8*3600*1000){
+    document.documentElement.style.display="none";
+    location.replace("index.html");
+  }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rekap Meter Air Tirto Utomo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -138,8 +148,8 @@ function pIuran(){const R=rows(),d=new jspdf.jsPDF('p','mm','a4');d.setFont('hel
 ['LEMBAR BACA METER','AIR BERSIH "TIRTO UTOMO" - JUNREJO - RW.04','TAGIHAN BULAN : '+lab(P)].forEach((t,i)=>d.text(t,105,12+i*5,{align:'center'}));
 const cs={0:{halign:'center',cellWidth:10},1:{cellWidth:42}};for(let i=2;i<8;i++)cs[i]={halign:'right',cellWidth:[22,22,22,20,26,26][i-2]};
 d.autoTable({startY:28,head:[['NO','NAMA KONSUMEN','Meter\nBulan lalu','Meter\nBulan Ini','Jumlah\nPemakaian','Beban','Total\nTagihan','Total\n<10K = 10K']],
-body:R.map(r=>[r.i+1,r.n,r.lalu??'',r.ini??'',r.pk??'',rp(S.b),rp(r.tot),rp(r.fin)]),foot:[['','','','','TOTAL TAGIHAN','',rp(sum(R,'tot')),rp(sum(R,'fin'))]],
-showFoot:'lastPage',theme:'grid',styles:{fontSize:8,cellPadding:1,textColor:0,lineColor:0,lineWidth:.1},headStyles:{fillColor:[221,221,221],textColor:0,halign:'center',valign:'middle'},footStyles:{fillColor:[221,221,221],textColor:0,halign:'right'},columnStyles:cs,didParseCell:h=>{if(h.section==='body'&&h.column.index===4&&typeof h.cell.raw==='number'){if(h.cell.raw<0)h.cell.styles.fillColor=[240,150,150];else if(h.cell.raw>=500)h.cell.styles.fillColor=[255,190,110]}},margin:{left:10,right:10,top:10,bottom:10}});
+body:R.map(r=>[r.i+1,r.n,r.lalu??'',r.ini??'',r.pk??'',rp(S.b),rp(r.tot),rp(r.fin)]),foot:[[{content:'TOTAL TAGIHAN',colSpan:6,styles:{halign:'center'}},rp(sum(R,'tot')),rp(sum(R,'fin'))]],
+showFoot:'lastPage',theme:'grid',styles:{fontSize:8,cellPadding:1,textColor:0,lineColor:0,lineWidth:.1},headStyles:{fillColor:[221,221,221],textColor:0,halign:'center',valign:'middle'},footStyles:{fillColor:[221,221,221],textColor:0,halign:'right'},columnStyles:cs,didParseCell:h=>{if(h.section==='body'&&h.column.index===4&&typeof h.cell.raw==='number'){if(h.cell.raw<0)h.cell.styles.fillColor=[240,150,150];else if(h.cell.raw>=500)h.cell.styles.fillColor=[255,190,110]}if(h.section==='body'&&h.column.index===1&&/INDOMARET|ENDANG|ALFAMART|HISANA/i.test(String(h.cell.raw)))h.cell.styles.textColor=[220,0,0];if(h.section==='body'&&h.column.index===7&&R[h.row.index]&&R[h.row.index].fin!==null&&R[h.row.index].fin<=10000)h.cell.styles.fillColor=[217,217,217]},margin:{left:10,right:10,top:10,bottom:10}});
 return['Real_Total_Iuran_'+tag()+'.pdf',d]}
 const K=25.4/96*.97,PT=25.4/72*.97,CWL=[128,69,69,71].map(v=>v*K),CWR=[128,69,69,74].map(v=>v*K),GAP=69*K,RH=[15,15.75,15,15,15,15,15,15,15,15,15.75].map(v=>v*PT),CH=RH.reduce((a,b)=>a+b),SM=a=>a.reduce((x,y)=>x+y);
 function card(d,x,y,w,r){const W=SM(w),ry=i=>y+SM(RH.slice(0,i)),mid=i=>ry(i)+RH[i]/2+1.2,R=x+W-1.2;d.setDrawColor(0);d.setLineWidth(.5);d.rect(x,y,W,CH);d.line(x,ry(2),x+W,ry(2));
